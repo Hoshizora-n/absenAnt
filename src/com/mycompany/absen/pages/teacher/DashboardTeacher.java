@@ -438,9 +438,14 @@ public class DashboardTeacher extends javax.swing.JFrame {
     private Map<String, Map<Integer, String>> fetchDataFromHistory(Connection connection) throws SQLException {
         Map<String, Map<Integer, String>> data = new TreeMap<>();
 
-        try (Statement statement = connection.createStatement()) {
-            String query = "SELECT meet_no, s.name as student_name, time FROM history h INNER JOIN students s ON s.id = h.student_id ORDER BY h.student_id, h.meet_no";
-            try (ResultSet resultSet = statement.executeQuery(query)) {
+        String query = "SELECT meet_no, s.name as student_name, time FROM history h INNER JOIN students s ON s.id = h.student_id WHERE course_id = ? ORDER BY h.student_id, h.meet_no";
+
+        // Assuming courseId is the parameter you want to set
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setLong(1, SelectedCourses.getId());
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     int meetNo = resultSet.getInt("meet_no");
                     String studentName = resultSet.getString("student_name");
